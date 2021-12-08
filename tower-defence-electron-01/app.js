@@ -63,6 +63,7 @@ import Projectile from './classes/projectile.js'
 
 import { rnd, getRandomInt } from './classes/math.js'
 import constants from './classes/consts.js'
+import Explosion from './classes/explosion.js'
 
 /* 
 ***********************************************************************************
@@ -139,6 +140,7 @@ const towers = [];
 const projectiles = [];
 const doodads = [];
 const walls = [];
+const explosions = [];
 
 // Graphics
 const doodadTextures = [];
@@ -231,6 +233,9 @@ function initGame(){
     createTowers(towers, NUM_TOWERS);
     createEnemies(enemies, NUM_ENEMIES);
     createWalls(walls, 100);
+    createExplosions(explosions, 100);
+
+    spawnExplosion(-200, 0, 0, 0, 3000, 1000);
 
     setInterval(spawnWaveofEnemies, 30000);
 
@@ -271,6 +276,7 @@ function updateState(){
     towers.forEach(t => t.updateState(enemies, projectiles));
     enemies.forEach(e => e.updateState(towers, enemies));
     projectiles.forEach(p => p.updateState());
+    explosions.forEach(e => e.updateState());
 
     enemyProjectileCollisionDetection();
 
@@ -338,8 +344,15 @@ function createWalls(wallArray, numWalls){
 
         wallArray.push(wall);
     }
+};
 
-    console.log('createWalls called');
+function createExplosions(explosionArray, numExplosions){
+
+    for(let i = 0; i < numExplosions; i++){
+
+        let explosion = new Explosion(0, 0, 0, 0, 0, 0);
+        explosionArray.push(explosion);
+    }
 };
 
 function createDoodads(worldBlocks){
@@ -392,8 +405,22 @@ function spawnWaveofEnemies(){
         enemy.friction = 0.0;
         enemy.restitution = 1.0;
     }
-    console.log('spawn wave of enemies called');
 };
+
+function spawnExplosion(posX, posY, velX, velY, lifeTime, strength){
+    
+    let explosion = explosions.find(value => !value.isAlive());
+
+    if(explosion === undefined){ return };
+
+    explosion.position.x = posX;
+    explosion.position.y = posY;
+    explosion.velocity.x = velX;
+    explosion.velocity.y = velY;
+    explosion.lifeTime = lifeTime;
+    explosion.strength = strength;
+    explosion.radius = 0.0;
+}
 
 function spawnTower(towerEnum, pos){
     
@@ -736,6 +763,7 @@ function renderScene(){
     renderGameEntities(worldBlocks, []);
 
     renderProjectiles();
+    renderExplosions();
 
     ctx.resetTransform();
     let numLiveDucks = enemies.filter(e => e.isAlive()).length;
@@ -791,6 +819,29 @@ function renderProjectiles(){
         ctx.closePath();
     }
 };
+
+function renderExplosions(){
+    
+    for(let i = 0; i < explosions.length; i++){
+
+        if( !explosions[i].isAlive()) { continue };
+        
+        var x = ( explosions[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
+        var y = ( explosions[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
+        ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
+
+        var rdl = ctx.createRadialGradient(0, 0, 0, 0, 0, explosions[i].radius);
+        rdl.addColorStop(0.0, 'rgba(255, 255, 255, 0)');
+        rdl.addColorStop(0.9, 'rgba(255, 255, 255, 0)');
+        rdl.addColorStop(1.0, 'rgba(255, 255, 255, 128)');
+    
+        ctx.beginPath();
+        ctx.fillStyle = rdl;
+        ctx.arc(0, 0, explosions[i].radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+};
+
 
 function loadTextureListIntoArray(list, array) {
     list.forEach(entry => {
