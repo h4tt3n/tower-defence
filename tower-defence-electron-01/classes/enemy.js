@@ -2,6 +2,7 @@
 import constants from './consts.js'
 import Vector from './vector.js'
 import GameEntity from './gameEntity.js'
+import Explosion from './explosion.js';
 
 export default class Enemy extends GameEntity {
     constructor(hitPoints, texture, restVelocity, posX, posY, sizeX, sizeY){
@@ -10,15 +11,15 @@ export default class Enemy extends GameEntity {
         this.explosionRangeSquared = 500**2; // TODO: Make random
         this.explosionDamage = 100.0; // TODO: Make random
     }
-    updateState(towers, enemies){
+    updateState(towers, enemies, walls){
         
         if( !this.isAlive()) { return };
         
         this.velocity.x += ( this.restVelocity - this.velocity.x) * 0.01;12354
 
-        this.selectTarget(towers, enemies);
+        this.selectTarget(towers, enemies, walls);
     }
-    selectTarget(towers, enemies){
+    selectTarget(towers, enemies, walls){
 
         if( !this.isAlive()) { return };
 
@@ -36,11 +37,29 @@ export default class Enemy extends GameEntity {
             
             if( distSquaredTower > distSquaredTemp ){
                 
-                this.explode(towers, enemies);
+                this.explode(towers, enemies, walls);
+                //spawnExplosion(this.position.x, this.position.y)
+            }
+        }
+
+        for(var i = 0; i < walls.length; i++){
+
+            if( !walls[i].isAlive()) { continue };
+            
+            let dVec = new Vector(
+                this.position.x - walls[i].position.x,
+                this.position.y - walls[i].position.y);
+            
+            let distSquaredTemp = dVec.x * dVec.x + dVec.y * dVec.y;
+            
+            if( distSquaredTower > distSquaredTemp ){
+                
+                this.explode(towers, enemies, walls);
+                //spawnExplosion(this.position.x, this.position.y)
             }
         }
     }
-    explode(towers, enemies){
+    explode(towers, enemies, walls){
 
         for(var i = 0; i < towers.length; i++){
 
@@ -60,6 +79,27 @@ export default class Enemy extends GameEntity {
 
             towers[i].velocity.x -= (dVec.x / distSquared) * towers[i].inverseMass * 100000000;
             towers[i].velocity.y -= (dVec.y / distSquared) * towers[i].inverseMass * 100000000;
+
+        }
+
+        for(var i = 0; i < walls.length; i++){
+
+            if( !walls[i].isAlive()) { continue };
+
+            let dVec = new Vector(
+                this.position.x - walls[i].position.x,
+                this.position.y - walls[i].position.y);
+            
+            let distSquared = (dVec.x * dVec.x + dVec.y * dVec.y );
+
+            if( this.explosionRangeSquared < distSquared ){ continue }
+
+            let damage = this.explosionDamage * ( distSquared / this.explosionRangeSquared );
+            
+            walls[i].hitPoints -= damage;
+
+            walls[i].velocity.x -= (dVec.x / distSquared) * walls[i].inverseMass * 100000000;
+            walls[i].velocity.y -= (dVec.y / distSquared) * walls[i].inverseMass * 100000000;
 
         }
 

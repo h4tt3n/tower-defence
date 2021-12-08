@@ -10,6 +10,6 @@ const constants = {
     NUM_DOODADS     : 400
 };
 
-export default constants;
-
 Object.freeze(constants);
+
+export default constants;

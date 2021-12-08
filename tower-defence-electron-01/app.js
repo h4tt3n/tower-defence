@@ -34,7 +34,7 @@
     economy
     game sound & music
     colored energy bar over turrets
-    better turret target ai - "leading the target"
+    better turret target AI - "leading the target"
     gameEntity inverse mass
     gameEntity collision restitution and friction
     projectile trails 
@@ -43,6 +43,7 @@
     screen HUD showing: num ducks left, time to next wave, caps left
     enemy ballistic targeting
     different types of enemies w. different abilities
+    physical object base class, for GameEntity, Camera, Explosion, Projectile ets.
 
 */
 
@@ -53,17 +54,17 @@
 ************************************************************************************
 */
 
-import Vector from './classes/vector.js'
+// Classes
 import Camera from './classes/camera.js'
 import GameEntity from './classes/gameEntity.js'
 import Tower from './classes/turret.js'
 import Enemy from './classes/enemy.js'
 import Projectile from './classes/projectile.js'
-//import Explosion from './classes/explosion.js'
-
-import { rnd, getRandomInt } from './classes/math.js'
-import constants from './classes/consts.js'
 import Explosion from './classes/explosion.js'
+
+// Functions
+import { rnd, getRandomInt } from './functions/math.js'
+import { collisionDetectionBetween, collisionDetectionAmong} from './functions/collision.js'
 
 /* 
 ***********************************************************************************
@@ -274,7 +275,7 @@ function updateState(){
     walls.forEach(t => t.updatePhysics());
 
     towers.forEach(t => t.updateState(enemies, projectiles));
-    enemies.forEach(e => e.updateState(towers, enemies));
+    enemies.forEach(e => e.updateState(towers, enemies, walls));
     projectiles.forEach(p => p.updateState());
     explosions.forEach(e => e.updateState());
 
@@ -287,6 +288,7 @@ function updateState(){
     collisionDetectionBetween(walls, towers);
 
     collisionDetectionAmong(walls);
+    collisionDetectionAmong(towers);
 };
 
 /* 
@@ -580,7 +582,7 @@ function spawnTower(towerEnum, pos){
 
             if(wall === undefined){ break };
 
-            wall.maxHitPoints = 200;
+            wall.maxHitPoints = 500;
             wall.hitPoints = wall.maxHitPoints;
             wall.texture = 0;
             wall.position.x = pos.x;
@@ -625,114 +627,6 @@ function enemyProjectileCollisionDetection(){
 
             projectiles[p].lifeTime = 0;
         }
-    }
-}
-
-function collisionDetectionBetween(arrayA, arrayB){
-    
-    for(let a = 0; a < arrayA.length; a++){
-
-        if( !arrayA[a].isAlive() ) { continue }
-
-        for(var b = 0; b < arrayB.length; b++){
-
-            if( !arrayB[b].isAlive() ) { continue }
-
-            let aLft = arrayA[a].position.x - arrayA[a].size.x;
-            let bRgt = arrayB[b].position.x + arrayB[b].size.x;
-
-            if( aLft > bRgt ) { continue }
-
-            let aRgt = arrayA[a].position.x + arrayA[a].size.x;
-            let bLft = arrayB[b].position.x - arrayB[b].size.x;
-
-            if( aRgt < bLft ) { continue }
-
-            let aBtm = arrayA[a].position.y + arrayA[a].size.y;
-            let bTop = arrayB[b].position.y - arrayB[b].size.y;
-
-            if( aBtm < bTop ) { continue }
-
-            let aTop = arrayA[a].position.y - arrayA[a].size.y;
-            let bBtm = arrayB[b].position.y + arrayB[b].size.y;
-
-            if( aTop > bBtm ) { continue }
-
-            boxBoxCollisionResolution(arrayA[a], arrayB[b]);
-        }
-    }
-};
-
-function collisionDetectionAmong(array){
-    
-    for(let a = 0; a < array.length-1; a++){
-
-        if( !array[a].isAlive() ) { continue }
-
-        for(var b = a + 1; b < array.length; b++){
-
-            if( !array[b].isAlive() ) { continue }
-
-            let aLft = array[a].position.x - array[a].size.x;
-            let bRgt = array[b].position.x + array[b].size.x;
-
-            if( aLft > bRgt ) { continue }
-
-            let aRgt = array[a].position.x + array[a].size.x;
-            let bLft = array[b].position.x - array[b].size.x;
-
-            if( aRgt < bLft ) { continue }
-
-            let aBtm = array[a].position.y + array[a].size.y;
-            let bTop = array[b].position.y - array[b].size.y;
-
-            if( aBtm < bTop ) { continue }
-
-            let aTop = array[a].position.y - array[a].size.y;
-            let bBtm = array[b].position.y + array[b].size.y;
-
-            if( aTop > bBtm ) { continue }
-
-            boxBoxCollisionResolution(array[a], array[b]);
-        }
-    }
-};
-
-function boxBoxCollisionResolution(boxA, boxB) {
-
-    let distX = boxA.position.x - boxB.position.x;
-    let distY = boxA.position.y - boxB.position.y;
-
-    let velX = boxA.velocity.x - boxB.velocity.x;
-    let velY = boxA.velocity.y - boxB.velocity.y;
-    
-    let intersectX = Math.abs(distX) - ( boxA.size.x + boxB.size.x );
-    let intersectY = Math.abs(distY) - ( boxA.size.y + boxB.size.y );
-
-    let reducedMass = (boxA.inverseMass + boxB.inverseMass) != 0.0 ? 1.0 / (boxA.inverseMass + boxB.inverseMass) : 0.0;
-
-    let massA = boxA.inverseMass * reducedMass;
-    let massB = boxB.inverseMass * reducedMass;
-
-    if( intersectX > intersectY ){
-
-        boxA.velocity.x -= ( 1.0 + boxA.restitution ) * velX * massA;
-        boxA.position.x -= 1.01 * Math.sign(distX) * intersectX * massA;
-        boxA.velocity.y -= boxA.friction * velY * massA;
-
-        boxB.velocity.x += ( 1.0 + boxB.restitution ) * velX * massB;
-        boxB.position.x += 1.01 * Math.sign(distX) * intersectX * massB;
-        boxB.velocity.y += boxB.friction * velY * massB;
-    } 
-    else {
-
-        boxA.velocity.y -= ( 1.0 + boxA.restitution ) * velY * massA;
-        boxA.position.y -= 1.01 * Math.sign(distY) * intersectY * massA;
-        boxA.velocity.x -= boxA.friction * velX * massA;
-
-        boxB.velocity.y += ( 1.0 + boxB.restitution ) * velY * massB;
-        boxB.position.y += 1.01 * Math.sign(distY) * intersectY * massB;
-        boxB.velocity.x += boxB.friction * velX * massB;
     }
 }
 
@@ -814,7 +708,7 @@ function renderProjectiles(){
         ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
         ctx.beginPath();
         ctx.arc(0, 0, 10, 0, Math.PI * 2);
-        ctx.fillStyle = "#FFFFFF";
+        ctx.fillStyle = "#444444";
         ctx.fill();
         ctx.closePath();
     }
