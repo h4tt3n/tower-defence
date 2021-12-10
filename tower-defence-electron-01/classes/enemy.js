@@ -5,17 +5,18 @@ import GameEntity from './gameEntity.js'
 import Explosion from './explosion.js';
 
 export default class Enemy extends GameEntity {
-    constructor(hitPoints, texture, restVelocity, posX, posY, sizeX, sizeY){
-        super(hitPoints, texture, posX, posY, sizeX, sizeY);
+    constructor(posX, posY, velX, velY, sizeX, sizeY, mass, friction, restitution, hitPoints, texture, 
+                restVelocity, explosionRange, explosionDamage){
+        super(posX, posY, velX, velY, sizeX, sizeY, mass, friction, restitution, hitPoints, texture);
         this.restVelocity = restVelocity; // TODO: Make random
-        this.explosionRangeSquared = 500**2; // TODO: Make random
-        this.explosionDamage = 100.0; // TODO: Make random
+        this.explosionRangeSquared = explosionRange**2; // TODO: Make random
+        this.explosionDamage = explosionDamage; // TODO: Make random
     }
     updateState(towers, enemies, walls){
         
         if( !this.isAlive()) { return };
         
-        this.velocity.x += ( this.restVelocity - this.velocity.x) * 0.01;12354
+        this.velocity.x += ( this.restVelocity - this.velocity.x) * 0.01;
 
         this.selectTarget(towers, enemies, walls);
     }

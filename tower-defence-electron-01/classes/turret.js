@@ -3,16 +3,17 @@ import Vector from './vector.js'
 import GameEntity from './gameEntity.js'
 
 export default class Tower extends GameEntity {
-    constructor(hitPoints, minRange, maxRange, coolDownTime, numProjectiles, projectileDamage, projectileVelocity, texture, posX, posY, sizeX, sizeY){
-        super(hitPoints, texture, posX, posY, sizeX, sizeY);
-        this.target = null;
+    constructor(posX, posY, velX, velY, sizeX, sizeY, mass, friction, restitution, hitPoints, texture, 
+                minRange, maxRange, coolDownTime, numProjectiles, projectileDamage, projectileVelocity){
+        super(posX, posY, velX, velY, sizeX, sizeY, mass, friction, restitution, hitPoints, texture);
+        this.minRangeSquared = minRange**2;
+        this.maxRangeSquared = maxRange**2;
         this.coolDownTime = coolDownTime;
-        this.canFire = true;
         this.numProjectiles = numProjectiles;
         this.projectileDamage = projectileDamage;
         this.projectileVelocity = projectileVelocity;
-        this.minRangeSquared = minRange**2;
-        this.maxRangeSquared = maxRange**2;
+        this.target = null;
+        this.canFire = true;
     }
     updateState(enemies, projectiles){
 

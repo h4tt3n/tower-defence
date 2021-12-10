@@ -302,12 +302,12 @@ function createLandscape(){
 
     let block = null;
 
-    block = new GameEntity( 1, null,      0,   1000, 20000, 3000 ); worldBlocks.push(block);
-    block = new GameEntity( 1, null,   14000,  1500, 8000, 2000 ); worldBlocks.push(block);
-    block = new GameEntity( 1, null,  22000,  2000, 8000, 1000 ); worldBlocks.push(block);
+    block = new GameEntity( 0,      1000, 0, 0, 20000, 3000, 0, 0, 0, 1, null ); worldBlocks.push(block);
+    block = new GameEntity( 14000,  1500, 0, 0,  8000, 2000, 0, 0, 0, 1, null ); worldBlocks.push(block);
+    block = new GameEntity( 22000,  2000, 0, 0,  8000, 1000, 0, 0, 0, 1, null ); worldBlocks.push(block);
 
-    block = new GameEntity( 1, null,  12000,  -700, 2000, 500 ); worldBlocks.push(block);
-    block = new GameEntity( 1, null,  20000,  -200, 2000, 500 ); worldBlocks.push(block);
+    block = new GameEntity( 12000,  -700, 0, 0, 2000, 500, 0, 0, 0, 1, null ); worldBlocks.push(block);
+    block = new GameEntity( 20000,  -200, 0, 0, 2000, 500, 0, 0, 0, 1, null ); worldBlocks.push(block);
 }
 
 function createProjectiles(projectileArray, numProjectiles){
@@ -323,7 +323,7 @@ function createTowers(towerArray, numTowers){
 
     for(let i = 0; i < numTowers; i++){
 
-        let tower = new Tower(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        let tower = new Tower( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 0, 0, 0, 0, 0, 0 );
         towerArray.push(tower);
     }
 };
@@ -332,7 +332,7 @@ function createEnemies(enemyArray, numEnemies){
 
     for(let i = 0; i < numEnemies; i++){
         
-        let enemy = new Enemy(0, 0, 0, 0, 0, 0, 0);
+        let enemy = new Enemy( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 0, 0, 0);
 
         enemyArray.push(enemy);
     }
@@ -342,7 +342,7 @@ function createWalls(wallArray, numWalls){
 
     for(let i = 0; i < numWalls; i++){
         
-        let wall = new GameEntity( 0, null, 0, 0, 0, 0 );
+        let wall = new GameEntity( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null );
 
         wallArray.push(wall);
     }
@@ -375,7 +375,7 @@ function createDoodads(worldBlocks){
     
             let texture = getRandomInt(0, doodadTextures.length-1);
             
-            let doodad = new GameEntity(1, texture, posX, posY, sizeX, sizeY);
+            let doodad = new GameEntity(posX, posY, 0, 0, sizeX, sizeY, -1, 0, 0, 1, texture );
             doodads.push(doodad);
         }
 

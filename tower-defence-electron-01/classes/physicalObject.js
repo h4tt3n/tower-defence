@@ -2,18 +2,28 @@ import constants from './consts.js'
 import Vector from './vector.js'
 
 export default class PhysicalObject {
-    constructor(posX, posY, velX, velY, sizeX, sizeY, friction, restitution){
+    constructor(posX, posY, velX, velY, sizeX, sizeY, mass, friction, restitution){
         this.position = new Vector(posX, posY);
         this.velocity = new Vector(velX, velY);
         this.size = new Vector(sizeX * 0.5, sizeY * 0.5);
         this.friction = friction;
         this.restitution = restitution;
-        this.inverseMass = computeInverseMass();
+        this.inverseMass = this.computeInverseMass(mass);
     }
-    computeInverseMass() {
+    computeInverseMass(mass) {
         
-        let area = this.size.x * 2.0 * this.size.y * 2.0;
-        return area > 0.0 ? 1.0 / area : 0.0;
+        if( mass > 0.0 ){
+
+            return 1.0 / mass;
+        }
+        else if( mass <= 0.0 ){
+            return 0.0;
+        }
+        else {
+
+            let area = this.size.x * 2.0 * this.size.y * 2.0;
+            return area > 0.0 ? 1.0 / area : 0.0;
+        }
     }
     updatePhysics(){
         
