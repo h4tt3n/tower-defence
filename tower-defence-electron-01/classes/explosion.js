@@ -24,7 +24,7 @@ export default class Explosion {
         this.radius += 5;
         
     }
-    doDamageWithingRadius(entityArray){
+    doDamageWithinRadius(entityArray){
         
         for(var i = 0; i < entityArray.length; i++){
 

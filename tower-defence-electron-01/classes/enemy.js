@@ -43,6 +43,8 @@ export default class Enemy extends GameEntity {
             }
         }
 
+        let distSquaredWall = 200**2;
+
         for(var i = 0; i < walls.length; i++){
 
             if( !walls[i].isAlive()) { continue };
@@ -53,7 +55,7 @@ export default class Enemy extends GameEntity {
             
             let distSquaredTemp = dVec.x * dVec.x + dVec.y * dVec.y;
             
-            if( distSquaredTower > distSquaredTemp ){
+            if( distSquaredWall > distSquaredTemp ){
                 
                 this.explode(towers, enemies, walls);
                 //spawnExplosion(this.position.x, this.position.y)
@@ -76,10 +78,14 @@ export default class Enemy extends GameEntity {
 
             let damage = this.explosionDamage * ( distSquared / this.explosionRangeSquared );
             
+            console.log('tower explosion! Damage: ', damage);
+
             towers[i].hitPoints -= damage;
 
             towers[i].velocity.x -= (dVec.x / distSquared) * towers[i].inverseMass * 100000000;
             towers[i].velocity.y -= (dVec.y / distSquared) * towers[i].inverseMass * 100000000;
+
+            console.log();
 
         }
 
@@ -97,6 +103,8 @@ export default class Enemy extends GameEntity {
 
             let damage = this.explosionDamage * ( distSquared / this.explosionRangeSquared );
             
+            console.log('wall explosion! Damage: ', damage);
+
             walls[i].hitPoints -= damage;
 
             walls[i].velocity.x -= (dVec.x / distSquared) * walls[i].inverseMass * 100000000;

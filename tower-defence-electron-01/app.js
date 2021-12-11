@@ -55,6 +55,7 @@
 */
 
 // Classes
+import Vector from './classes/vector.js'
 import Camera from './classes/camera.js'
 import GameEntity from './classes/gameEntity.js'
 import Tower from './classes/turret.js'
@@ -65,6 +66,7 @@ import Explosion from './classes/explosion.js'
 // Functions
 import { rnd, getRandomInt } from './functions/math.js'
 import { collisionDetectionBetween, collisionDetectionAmong} from './functions/collision.js'
+import PhysicalObject from './classes/physicalObject.js'
 
 /* 
 ***********************************************************************************
@@ -236,11 +238,21 @@ function initGame(){
     createWalls(walls, 100);
     createExplosions(explosions, 100);
 
-    spawnExplosion(-200, 0, 0, 0, 3000, 1000);
+    spawnExplosion(-200, 0, 0, 0, 10000, 1000);
 
     setInterval(spawnWaveofEnemies, 30000);
 
     setInterval(gameLoop, FPS);
+
+    let v = new Vector();
+    let p = new PhysicalObject(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    let g = new GameEntity(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+    let e = new Enemy(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)
+
+    console.log(p);
+    console.log(g);
+    console.log(e);
+    console.log(v instanceof Vector);
 
 };
 
@@ -302,12 +314,12 @@ function createLandscape(){
 
     let block = null;
 
-    block = new GameEntity( 0,      1000, 0, 0, 20000, 3000, 0, 0, 0, 1, null ); worldBlocks.push(block);
-    block = new GameEntity( 14000,  1500, 0, 0,  8000, 2000, 0, 0, 0, 1, null ); worldBlocks.push(block);
-    block = new GameEntity( 22000,  2000, 0, 0,  8000, 1000, 0, 0, 0, 1, null ); worldBlocks.push(block);
+    block = new GameEntity(     0,  1000, 0, 0, 20000, 3000, -1, 0, 0, 1, null ); worldBlocks.push(block);
+    block = new GameEntity( 14000,  1500, 0, 0,  8000, 2000, -1, 0, 0, 1, null ); worldBlocks.push(block);
+    block = new GameEntity( 22000,  2000, 0, 0,  8000, 1000, -1, 0, 0, 1, null ); worldBlocks.push(block);
 
-    block = new GameEntity( 12000,  -700, 0, 0, 2000, 500, 0, 0, 0, 1, null ); worldBlocks.push(block);
-    block = new GameEntity( 20000,  -200, 0, 0, 2000, 500, 0, 0, 0, 1, null ); worldBlocks.push(block);
+    block = new GameEntity( 12000,  -700, 0, 0,  2000,  500, -1, 0, 0, 1, null ); worldBlocks.push(block);
+    block = new GameEntity( 20000,  -200, 0, 0,  2000,  500, -1, 0, 0, 1, null ); worldBlocks.push(block);
 }
 
 function createProjectiles(projectileArray, numProjectiles){
@@ -406,6 +418,8 @@ function spawnWaveofEnemies(){
         enemy.inverseMass = 1.0 / (enemy.size.x * enemy.size.y);
         enemy.friction = 0.0;
         enemy.restitution = 1.0;
+        enemy.explosionRangeSquared = 500**2;
+        enemy.explosionDamage = 100;
     }
 };
 
@@ -452,7 +466,7 @@ function spawnTower(towerEnum, pos){
             tower.velocity.y = 0.0;
             tower.size.x = 300 * 0.5;
             tower.size.y = 200 * 0.5;
-            tower.inverseMass = 1.0 / (tower.size.x * tower.size.y);
+            tower.inverseMass = tower.computeInverseMass(0);
             tower.friction = 0.9;
             tower.restitution = 0.1;
 
@@ -482,7 +496,7 @@ function spawnTower(towerEnum, pos){
             tower.velocity.y = 0.0;
             tower.size.x = 200 * 0.5;
             tower.size.y = 160 * 0.5;
-            tower.inverseMass = 1.0 / (tower.size.x * tower.size.y);
+            tower.inverseMass = tower.computeInverseMass(0);
             tower.friction = 0.8;
             tower.restitution = 0.2;
 
@@ -511,7 +525,7 @@ function spawnTower(towerEnum, pos){
             tower.velocity.y = 0.0;
             tower.size.x = 180 * 0.5;
             tower.size.y = 150 * 0.5;
-            tower.inverseMass = 1.0 / (tower.size.x * tower.size.y);
+            tower.inverseMass = tower.computeInverseMass(0);
             tower.friction = 0.7;
             tower.restitution = 0.3;
 
@@ -540,7 +554,7 @@ function spawnTower(towerEnum, pos){
             tower.velocity.y = 0.0;
             tower.size.x = 150 * 0.5;
             tower.size.y = 120 * 0.5;
-            tower.inverseMass = 1.0 / (tower.size.x * tower.size.y);
+            tower.inverseMass = tower.computeInverseMass(0);
             tower.friction = 0.6;
             tower.restitution = 0.4;
 
@@ -569,7 +583,7 @@ function spawnTower(towerEnum, pos){
             tower.velocity.y = 0.0;
             tower.size.x = 150 * 0.5;
             tower.size.y = 120 * 0.5;
-            tower.inverseMass = 1.0 / (tower.size.x * tower.size.y);
+            tower.inverseMass = tower.computeInverseMass(0);
             tower.friction = 0.5;
             tower.restitution = 0.5;
 
@@ -591,7 +605,7 @@ function spawnTower(towerEnum, pos){
             wall.velocity.y = 0.0;
             wall.size.x = 250 * 0.5;
             wall.size.y = 250 * 0.5;
-            wall.inverseMass = 1.0 / (wall.size.x * wall.size.y);
+            wall.inverseMass = wall.computeInverseMass(0);
             wall.friction = 0.8;
             wall.restitution = 0.3;
 
@@ -683,7 +697,8 @@ function renderGameEntities(array, textureArray){
         if( img === null || img === undefined ){
 
             var my_gradient = ctx.createLinearGradient(0, -array[i].size.y, 0, array[i].size.y);
-            my_gradient.addColorStop(0, "#ffffff");
+            my_gradient.addColorStop(0, "#ffffff"); // ccddff
+            my_gradient.addColorStop(1 - (array[i].size.y / (array[i].size.y + 20)), "#ffffff");
             my_gradient.addColorStop(1 - (array[i].size.y / (array[i].size.y + 80)), "#886655");
             my_gradient.addColorStop(1, "#886655");
             ctx.fillStyle = my_gradient;
@@ -724,10 +739,13 @@ function renderExplosions(){
         var y = ( explosions[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
         ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
 
+        var alpha = (explosions[i].lifeTime / 10000.0);
+        console.log(alpha);
+
         var rdl = ctx.createRadialGradient(0, 0, 0, 0, 0, explosions[i].radius);
         rdl.addColorStop(0.0, 'rgba(255, 255, 255, 0)');
         rdl.addColorStop(0.9, 'rgba(255, 255, 255, 0)');
-        rdl.addColorStop(1.0, 'rgba(255, 255, 255, 128)');
+        rdl.addColorStop(1.0, `rgba(255, 255, 255, ${alpha})`);
     
         ctx.beginPath();
         ctx.fillStyle = rdl;
