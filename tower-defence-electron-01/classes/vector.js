@@ -19,7 +19,7 @@ export default class Vector {
     }
     sub(v){ 
         if (v instanceof Vector){
-            this.x -= v.x; this.y -= v.y;
+            this.x - v.x; this.y -= v.y;
         }
         else {
             this.x -= v; this.y -= v;
@@ -28,8 +28,12 @@ export default class Vector {
         return this;
     }
     mul(s){ 
-        
-        return new Vector(this.x *= s, this.y *= s);
+        if (s instanceof Vector){
+            return new Vector(this.x * s.x, this.y * s.y);
+        }
+        else {
+            return new Vector(this.x * s, this.y * s);
+        }
     }
     div(s){ 
         this.x /= s; this.y /= s; 

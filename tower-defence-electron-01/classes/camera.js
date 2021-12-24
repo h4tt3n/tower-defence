@@ -12,7 +12,7 @@ export default class Camera {
         this.deltaPan = 0.1;
         this.deltaZoom = 0.1;
         this.zoomSpeed = 0.01;
-        this.restZoom = 0.5;
+        this.restZoom = 0.2;
     }
     updateState(){
 

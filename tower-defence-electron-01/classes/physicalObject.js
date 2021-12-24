@@ -23,7 +23,6 @@ export default class PhysicalObject {
         else {
 
             let area = this.size.x * 2.0 * this.size.y * 2.0;
-
             let density = 0.01;
             let mass = area * density;
 
@@ -43,11 +42,10 @@ export default class PhysicalObject {
             //this.position.x += this.velocity.x * constants.DT;
             //this.position.y += this.velocity.y * constants.DT;
 
-            let vel = new Vector(this.velocity.x, this.velocity.y);
+            //let vel = new Vector(this.velocity.x, this.velocity.y);
 
-            this.position.add(vel.mul(constants.DT)); 
-            //this.position.add(this.velocity.mul(constants.DT)); // Doesn't work
-
+            //this.position.add(vel.mul(constants.DT));  // Works
+            this.position.add(this.velocity.mul(constants.DT)); // Doesn't work ?!?
 
         };
     }

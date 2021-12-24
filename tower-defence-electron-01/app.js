@@ -56,8 +56,9 @@
 
 // Classes
 import Vector from './classes/vector.js'
-import Camera from './classes/camera.js'
+import PhysicalObject from './classes/physicalObject.js'
 import GameEntity from './classes/gameEntity.js'
+import Camera from './classes/camera.js'
 import Tower from './classes/turret.js'
 import Enemy from './classes/enemy.js'
 import Projectile from './classes/projectile.js'
@@ -66,7 +67,7 @@ import Explosion from './classes/explosion.js'
 // Functions
 import { rnd, getRandomInt } from './functions/math.js'
 import { collisionDetectionBetween, collisionDetectionAmong} from './functions/collision.js'
-import PhysicalObject from './classes/physicalObject.js'
+
 
 /* 
 ***********************************************************************************
@@ -238,7 +239,7 @@ function initGame(){
     createWalls(walls, 100);
     createExplosions(explosions, 100);
 
-    spawnExplosion(-200, 0, 0, 0, 10000, 1000);
+    spawnExplosion(-200, 0, 0, 0, 2000, 1000);
 
     setInterval(spawnWaveofEnemies, 30000);
 
@@ -640,6 +641,8 @@ function enemyProjectileCollisionDetection(){
             enemies[e].hitPoints -= projectiles[p].damage;
 
             projectiles[p].lifeTime = 0;
+
+            spawnExplosion(projectiles[p].position.x, projectiles[p].position.y, 0, 0, 500, 0);
         }
     }
 }
@@ -739,7 +742,7 @@ function renderExplosions(){
         var y = ( explosions[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
         ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
 
-        var alpha = (explosions[i].lifeTime / 10000.0);
+        var alpha = (explosions[i].lifeTime / 2000.0);
         console.log(alpha);
 
         var rdl = ctx.createRadialGradient(0, 0, 0, 0, 0, explosions[i].radius);

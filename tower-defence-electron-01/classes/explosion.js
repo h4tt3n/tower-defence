@@ -1,12 +1,12 @@
 import constants from './consts.js'
 import Vector from './vector.js'
+import PhysicalObject from './physicalObject.js';
 
 //import { rnd, getRandomInt } from './classes/math.js'
 
-export default class Explosion {
+export default class Explosion extends PhysicalObject{
     constructor(posX, posY, velX, velY, lifeTime, strength){
-        this.position = new Vector(posX, posY);
-        this.velocity = new Vector(velX, velY);
+        super(posX, posY, velX, velY, 0, 0, 0, 0, 0);
         this.radius = 0.0;
         this.lifeTime = lifeTime;
         this.strength = strength;
@@ -16,13 +16,11 @@ export default class Explosion {
     }
     updateState(){
         
-        if( this.isAlive() ) { this.lifeTime -= constants.DT * 1000 };
-
-        this.position.x += this.velocity.x * constants.DT;
-        this.position.y += this.velocity.y * constants.DT;
-
-        this.radius += 5;
-        
+        if( !this.isAlive()) { return };
+            
+        this.lifeTime -= constants.DT * 1000;
+        this.radius += 40;
+        super.updatePhysics();
     }
     doDamageWithinRadius(entityArray){
         
@@ -34,7 +32,7 @@ export default class Explosion {
                 this.position.x - entityArray[i].position.x,
                 this.position.y - entityArray[i].position.y);
             
-            let distSquared = (dVec.x * dVec.x + dVec.y * dVec.y );
+            let distSquared = dVec.x * dVec.x + dVec.y * dVec.y;
 
             if( this.explosionRangeSquared < distSquared ){ continue }
 
