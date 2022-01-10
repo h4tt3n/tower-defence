@@ -72,7 +72,7 @@ export default class Tower extends GameEntity {
             projectile.lifeTime = 5000;
             projectile.damage = this.projectileDamage;
             projectile.position.x = this.position.x;
-            projectile.position.y = this.position.y;ddddd
+            projectile.position.y = this.position.y;
 
             let rnd1 = (Math.random() - Math.random()) * 0.08;
             let rnd2 = (Math.random() - Math.random()) * 0.08;
