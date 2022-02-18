@@ -239,8 +239,6 @@ function initGame(){
     createWalls(walls, 100);
     createExplosions(explosions, 100);
 
-    spawnExplosion(-200, 0, 0, 0, 2000, 1000);
-
     setInterval(spawnWaveofEnemies, 30000);
 
     setInterval(gameLoop, FPS);
@@ -591,6 +589,7 @@ function spawnTower(towerEnum, pos){
             break;
         };
 
+        // Tower block
         case 6: {
 
             let wall = walls.find(value => !value.isAlive());
