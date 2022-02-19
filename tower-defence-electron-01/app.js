@@ -666,6 +666,11 @@ function renderScene(){
     ctx.fillStyle = my_gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Camera matrix transform
+    var x = -camera.position.x * camera.zoom + canvas.width * 0.5;
+    var y = -camera.position.y * camera.zoom + canvas.height * 0.5;
+    ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
+
     renderGameEntities(doodads, doodadTextures);
     renderGameEntities(walls, wallTextures);
     renderGameEntities(towers, towerTextures);
@@ -692,24 +697,34 @@ function renderGameEntities(array, textureArray){
         if( !array[i].isAlive()) { continue };
 
         var img = textureArray[array[i].texture];
-        var x = ( array[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
-        var y = ( array[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
-        ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
+        // var x = ( array[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
+        // var y = ( array[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
+        // ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
         
         if( img === null || img === undefined ){
 
-            var my_gradient = ctx.createLinearGradient(0, -array[i].size.y, 0, array[i].size.y);
+            var my_gradient = ctx.createLinearGradient(array[i].position.x, array[i].position.y-array[i].size.y, array[i].position.x, array[i].position.y+array[i].size.y);
             my_gradient.addColorStop(0, "#ffffff"); // ccddff
             my_gradient.addColorStop(1 - (array[i].size.y / (array[i].size.y + 20)), "#ffffff");
             my_gradient.addColorStop(1 - (array[i].size.y / (array[i].size.y + 80)), "#886655");
             my_gradient.addColorStop(1, "#886655");
             ctx.fillStyle = my_gradient;
 
-            ctx.fillRect(-array[i].size.x, -array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
+            //ctx.fillRect(-array[i].size.x, -array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
+            ctx.fillRect(
+                array[i].position.x - array[i].size.x, 
+                array[i].position.y - array[i].size.y, 
+                array[i].size.x * 2, 
+                array[i].size.y * 2);
         } 
         else {
 
-            ctx.drawImage(img, -array[i].size.x, -array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
+            ctx.drawImage(
+                img, 
+                array[i].position.x - array[i].size.x, 
+                array[i].position.y - array[i].size.y, 
+                array[i].size.x * 2, 
+                array[i].size.y * 2);
         }
     }
 };
@@ -720,11 +735,11 @@ function renderProjectiles(){
 
         if( !projectiles[i].isAlive()) { continue };
         
-        var x = ( projectiles[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
-        var y = ( projectiles[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
-        ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
+        // var x = ( projectiles[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
+        // var y = ( projectiles[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
+        // ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
         ctx.beginPath();
-        ctx.arc(0, 0, 10, 0, Math.PI * 2);
+        ctx.arc(projectiles[i].position.x, projectiles[i].position.y, 10, 0, Math.PI * 2);
         ctx.fillStyle = "#444444";
         ctx.fill();
         ctx.closePath();
@@ -737,9 +752,9 @@ function renderExplosions(){
 
         if( !explosions[i].isAlive()) { continue };
         
-        var x = ( explosions[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
-        var y = ( explosions[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
-        ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
+        // var x = ( explosions[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
+        // var y = ( explosions[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
+        // ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
 
         var alpha = (explosions[i].lifeTime / 2000.0);
         console.log(alpha);
@@ -751,7 +766,7 @@ function renderExplosions(){
     
         ctx.beginPath();
         ctx.fillStyle = rdl;
-        ctx.arc(0, 0, explosions[i].radius, 0, Math.PI * 2);
+        ctx.arc(explosions[i].position.x, explosions[i].position.y, explosions[i].radius, 0, Math.PI * 2);
         ctx.fill();
     }
 };
