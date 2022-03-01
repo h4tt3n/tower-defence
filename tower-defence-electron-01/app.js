@@ -671,6 +671,7 @@ function renderScene(){
     var y = -camera.position.y * camera.zoom + canvas.height * 0.5;
     ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
 
+    // Render game objects
     renderGameEntities(doodads, doodadTextures);
     renderGameEntities(walls, wallTextures);
     renderGameEntities(towers, towerTextures);
@@ -680,6 +681,7 @@ function renderScene(){
     renderProjectiles();
     renderExplosions();
 
+    // 
     ctx.resetTransform();
     let numLiveDucks = enemies.filter(e => e.isAlive()).length;
     ctx.font = '24px serif';
@@ -697,9 +699,6 @@ function renderGameEntities(array, textureArray){
         if( !array[i].isAlive()) { continue };
 
         var img = textureArray[array[i].texture];
-        // var x = ( array[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
-        // var y = ( array[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
-        // ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
         
         if( img === null || img === undefined ){
 
@@ -710,7 +709,6 @@ function renderGameEntities(array, textureArray){
             my_gradient.addColorStop(1, "#886655");
             ctx.fillStyle = my_gradient;
 
-            //ctx.fillRect(-array[i].size.x, -array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
             ctx.fillRect(
                 array[i].position.x - array[i].size.x, 
                 array[i].position.y - array[i].size.y, 
@@ -735,9 +733,6 @@ function renderProjectiles(){
 
         if( !projectiles[i].isAlive()) { continue };
         
-        // var x = ( projectiles[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
-        // var y = ( projectiles[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
-        // ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
         ctx.beginPath();
         ctx.arc(projectiles[i].position.x, projectiles[i].position.y, 10, 0, Math.PI * 2);
         ctx.fillStyle = "#444444";
@@ -752,14 +747,12 @@ function renderExplosions(){
 
         if( !explosions[i].isAlive()) { continue };
         
-        // var x = ( explosions[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
-        // var y = ( explosions[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
-        // ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
-
         var alpha = (explosions[i].lifeTime / 2000.0);
         console.log(alpha);
 
-        var rdl = ctx.createRadialGradient(0, 0, 0, 0, 0, explosions[i].radius);
+        var rdl = ctx.createRadialGradient(
+            explosions[i].position.x, explosions[i].position.y, 0, 
+            explosions[i].position.x, explosions[i].position.y, explosions[i].radius);
         rdl.addColorStop(0.0, 'rgba(255, 255, 255, 0)');
         rdl.addColorStop(0.9, 'rgba(255, 255, 255, 0)');
         rdl.addColorStop(1.0, `rgba(255, 255, 255, ${alpha})`);
@@ -770,7 +763,6 @@ function renderExplosions(){
         ctx.fill();
     }
 };
-
 
 function loadTextureListIntoArray(list, array) {
     list.forEach(entry => {
