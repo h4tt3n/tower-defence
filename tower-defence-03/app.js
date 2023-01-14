@@ -34,7 +34,7 @@
     economy
     game sound & music
     colored energy bar over turrets
-    better turret target AI - "leading the target"
+    better turret target ai - "leading the target"
     gameEntity inverse mass
     gameEntity collision restitution and friction
     projectile trails 
@@ -43,7 +43,6 @@
     screen HUD showing: num ducks left, time to next wave, caps left
     enemy ballistic targeting
     different types of enemies w. different abilities
-    physical object base class, for GameEntity, Camera, Explosion, Projectile ets.
 
 */
 
@@ -54,20 +53,16 @@
 ************************************************************************************
 */
 
-// Classes
 import Vector from './classes/vector.js'
-import PhysicalObject from './classes/physicalObject.js'
-import GameEntity from './classes/gameEntity.js'
 import Camera from './classes/camera.js'
+import GameEntity from './classes/gameEntity.js'
 import Tower from './classes/turret.js'
 import Enemy from './classes/enemy.js'
 import Projectile from './classes/projectile.js'
-import Explosion from './classes/explosion.js'
+//import Explosion from './classes/explosion.js'
 
-// Functions
-import { rnd, getRandomInt } from './functions/math.js'
-import { collisionDetectionBetween, collisionDetectionAmong} from './functions/collision.js'
-
+import { rnd, getRandomInt } from './classes/math.js'
+import constants from './classes/consts.js'
 
 /* 
 ***********************************************************************************
@@ -144,7 +139,6 @@ const towers = [];
 const projectiles = [];
 const doodads = [];
 const walls = [];
-const explosions = [];
 
 // Graphics
 const doodadTextures = [];
@@ -207,8 +201,8 @@ function initGame(){
     
     // Canvas
     canvas = document.querySelector("#gameCanvas");
-    canvas.setAttribute('width', window.innerWidth);
-    canvas.setAttribute('height', window.innerHeight);
+    canvas.setAttribute('width', window.innerWidth * 0.95);
+    canvas.setAttribute('height', window.innerHeight * 0.9);
 
     // Context
     ctx = canvas.getContext("2d");
@@ -237,22 +231,11 @@ function initGame(){
     createTowers(towers, NUM_TOWERS);
     createEnemies(enemies, NUM_ENEMIES);
     createWalls(walls, 100);
-    createExplosions(explosions, 100);
 
     setInterval(spawnWaveofEnemies, 30000);
 
     setInterval(gameLoop, FPS);
-
-    let v = new Vector();
-    let p = new PhysicalObject(1, 2, 3, 4, 5, 6, 7, 8, 9);
-    let g = new GameEntity(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
-    let e = new Enemy(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)
-
-    console.log(p);
-    console.log(g);
-    console.log(e);
-    console.log(v instanceof Vector);
-
+    requestAnimationFrame(renderScene);
 };
 
 function gameLoop(){
@@ -273,7 +256,7 @@ function gameLoop(){
 
     updateState();
     
-    requestAnimationFrame(renderScene);
+    //requestAnimationFrame(renderScene);
 };
 
 function updateState(){
@@ -286,9 +269,8 @@ function updateState(){
     walls.forEach(t => t.updatePhysics());
 
     towers.forEach(t => t.updateState(enemies, projectiles));
-    enemies.forEach(e => e.updateState(towers, enemies, walls));
+    enemies.forEach(e => e.updateState(towers, enemies));
     projectiles.forEach(p => p.updateState());
-    explosions.forEach(e => e.updateState());
 
     enemyProjectileCollisionDetection();
 
@@ -299,7 +281,6 @@ function updateState(){
     collisionDetectionBetween(walls, towers);
 
     collisionDetectionAmong(walls);
-    collisionDetectionAmong(towers);
 };
 
 /* 
@@ -313,12 +294,12 @@ function createLandscape(){
 
     let block = null;
 
-    block = new GameEntity(     0,  1000, 0, 0, 20000, 3000, -1, 0, 0, 1, null ); worldBlocks.push(block);
-    block = new GameEntity( 14000,  1500, 0, 0,  8000, 2000, -1, 0, 0, 1, null ); worldBlocks.push(block);
-    block = new GameEntity( 22000,  2000, 0, 0,  8000, 1000, -1, 0, 0, 1, null ); worldBlocks.push(block);
+    block = new GameEntity( 1, null,     0,  1000, 20000, 3000 ); worldBlocks.push(block);
+    block = new GameEntity( 1, null, 14000,  1500,  8000, 2000 ); worldBlocks.push(block);
+    block = new GameEntity( 1, null, 22000,  2000,  8000, 1000 ); worldBlocks.push(block);
 
-    block = new GameEntity( 12000,  -700, 0, 0,  2000,  500, -1, 0, 0, 1, null ); worldBlocks.push(block);
-    block = new GameEntity( 20000,  -200, 0, 0,  2000,  500, -1, 0, 0, 1, null ); worldBlocks.push(block);
+    block = new GameEntity( 1, null,  12000,  -700, 2000, 500 ); worldBlocks.push(block);
+    block = new GameEntity( 1, null,  20000,  -200, 2000, 500 ); worldBlocks.push(block);
 }
 
 function createProjectiles(projectileArray, numProjectiles){
@@ -334,7 +315,7 @@ function createTowers(towerArray, numTowers){
 
     for(let i = 0; i < numTowers; i++){
 
-        let tower = new Tower( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 0, 0, 0, 0, 0, 0 );
+        let tower = new Tower(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         towerArray.push(tower);
     }
 };
@@ -343,7 +324,7 @@ function createEnemies(enemyArray, numEnemies){
 
     for(let i = 0; i < numEnemies; i++){
         
-        let enemy = new Enemy( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, 0, 0, 0);
+        let enemy = new Enemy(0, 0, 0, 0, 0, 0, 0);
 
         enemyArray.push(enemy);
     }
@@ -353,19 +334,12 @@ function createWalls(wallArray, numWalls){
 
     for(let i = 0; i < numWalls; i++){
         
-        let wall = new GameEntity( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null );
+        let wall = new GameEntity( 0, null, 0, 0, 0, 0 );
 
         wallArray.push(wall);
     }
-};
 
-function createExplosions(explosionArray, numExplosions){
-
-    for(let i = 0; i < numExplosions; i++){
-
-        let explosion = new Explosion(0, 0, 0, 0, 0, 0);
-        explosionArray.push(explosion);
-    }
+    console.log('createWalls called');
 };
 
 function createDoodads(worldBlocks){
@@ -386,7 +360,7 @@ function createDoodads(worldBlocks){
     
             let texture = getRandomInt(0, doodadTextures.length-1);
             
-            let doodad = new GameEntity(posX, posY, 0, 0, sizeX, sizeY, -1, 0, 0, 1, texture );
+            let doodad = new GameEntity(1, texture, posX, posY, sizeX, sizeY);
             doodads.push(doodad);
         }
 
@@ -417,25 +391,9 @@ function spawnWaveofEnemies(){
         enemy.inverseMass = 1.0 / (enemy.size.x * enemy.size.y);
         enemy.friction = 0.0;
         enemy.restitution = 1.0;
-        enemy.explosionRangeSquared = 500**2;
-        enemy.explosionDamage = 100;
     }
+    console.log('spawn wave of enemies called');
 };
-
-function spawnExplosion(posX, posY, velX, velY, lifeTime, strength){
-    
-    let explosion = explosions.find(value => !value.isAlive());
-
-    if(explosion === undefined){ return };
-
-    explosion.position.x = posX;
-    explosion.position.y = posY;
-    explosion.velocity.x = velX;
-    explosion.velocity.y = velY;
-    explosion.lifeTime = lifeTime;
-    explosion.strength = strength;
-    explosion.radius = 0.0;
-}
 
 function spawnTower(towerEnum, pos){
     
@@ -465,7 +423,7 @@ function spawnTower(towerEnum, pos){
             tower.velocity.y = 0.0;
             tower.size.x = 300 * 0.5;
             tower.size.y = 200 * 0.5;
-            tower.inverseMass = tower.computeInverseMass(0);
+            tower.inverseMass = 1.0 / (tower.size.x * tower.size.y);
             tower.friction = 0.9;
             tower.restitution = 0.1;
 
@@ -495,7 +453,7 @@ function spawnTower(towerEnum, pos){
             tower.velocity.y = 0.0;
             tower.size.x = 200 * 0.5;
             tower.size.y = 160 * 0.5;
-            tower.inverseMass = tower.computeInverseMass(0);
+            tower.inverseMass = 1.0 / (tower.size.x * tower.size.y);
             tower.friction = 0.8;
             tower.restitution = 0.2;
 
@@ -524,7 +482,7 @@ function spawnTower(towerEnum, pos){
             tower.velocity.y = 0.0;
             tower.size.x = 180 * 0.5;
             tower.size.y = 150 * 0.5;
-            tower.inverseMass = tower.computeInverseMass(0);
+            tower.inverseMass = 1.0 / (tower.size.x * tower.size.y);
             tower.friction = 0.7;
             tower.restitution = 0.3;
 
@@ -553,7 +511,7 @@ function spawnTower(towerEnum, pos){
             tower.velocity.y = 0.0;
             tower.size.x = 150 * 0.5;
             tower.size.y = 120 * 0.5;
-            tower.inverseMass = tower.computeInverseMass(0);
+            tower.inverseMass = 1.0 / (tower.size.x * tower.size.y);
             tower.friction = 0.6;
             tower.restitution = 0.4;
 
@@ -582,21 +540,20 @@ function spawnTower(towerEnum, pos){
             tower.velocity.y = 0.0;
             tower.size.x = 150 * 0.5;
             tower.size.y = 120 * 0.5;
-            tower.inverseMass = tower.computeInverseMass(0);
+            tower.inverseMass = 1.0 / (tower.size.x * tower.size.y);
             tower.friction = 0.5;
             tower.restitution = 0.5;
 
             break;
         };
 
-        // Tower block
         case 6: {
 
             let wall = walls.find(value => !value.isAlive());
 
             if(wall === undefined){ break };
 
-            wall.maxHitPoints = 500;
+            wall.maxHitPoints = 200;
             wall.hitPoints = wall.maxHitPoints;
             wall.texture = 0;
             wall.position.x = pos.x;
@@ -605,7 +562,7 @@ function spawnTower(towerEnum, pos){
             wall.velocity.y = 0.0;
             wall.size.x = 250 * 0.5;
             wall.size.y = 250 * 0.5;
-            wall.inverseMass = wall.computeInverseMass(0);
+            wall.inverseMass = 1.0 / (wall.size.x * wall.size.y);
             wall.friction = 0.8;
             wall.restitution = 0.3;
 
@@ -640,9 +597,115 @@ function enemyProjectileCollisionDetection(){
             enemies[e].hitPoints -= projectiles[p].damage;
 
             projectiles[p].lifeTime = 0;
-
-            spawnExplosion(projectiles[p].position.x, projectiles[p].position.y, 0, 0, 500, 0);
         }
+    }
+}
+
+function collisionDetectionBetween(arrayA, arrayB){
+    
+    for(let a = 0; a < arrayA.length; a++){
+
+        if( !arrayA[a].isAlive() ) { continue }
+
+        for(var b = 0; b < arrayB.length; b++){
+
+            if( !arrayB[b].isAlive() ) { continue }
+
+            let aLft = arrayA[a].position.x - arrayA[a].size.x;
+            let bRgt = arrayB[b].position.x + arrayB[b].size.x;
+
+            if( aLft > bRgt ) { continue }
+
+            let aRgt = arrayA[a].position.x + arrayA[a].size.x;
+            let bLft = arrayB[b].position.x - arrayB[b].size.x;
+
+            if( aRgt < bLft ) { continue }
+
+            let aBtm = arrayA[a].position.y + arrayA[a].size.y;
+            let bTop = arrayB[b].position.y - arrayB[b].size.y;
+
+            if( aBtm < bTop ) { continue }
+
+            let aTop = arrayA[a].position.y - arrayA[a].size.y;
+            let bBtm = arrayB[b].position.y + arrayB[b].size.y;
+
+            if( aTop > bBtm ) { continue }
+
+            boxBoxCollisionResolution(arrayA[a], arrayB[b]);
+        }
+    }
+};
+
+function collisionDetectionAmong(array){
+    
+    for(let a = 0; a < array.length-1; a++){
+
+        if( !array[a].isAlive() ) { continue }
+
+        for(var b = a + 1; b < array.length; b++){
+
+            if( !array[b].isAlive() ) { continue }
+
+            let aLft = array[a].position.x - array[a].size.x;
+            let bRgt = array[b].position.x + array[b].size.x;
+
+            if( aLft > bRgt ) { continue }
+
+            let aRgt = array[a].position.x + array[a].size.x;
+            let bLft = array[b].position.x - array[b].size.x;
+
+            if( aRgt < bLft ) { continue }
+
+            let aBtm = array[a].position.y + array[a].size.y;
+            let bTop = array[b].position.y - array[b].size.y;
+
+            if( aBtm < bTop ) { continue }
+
+            let aTop = array[a].position.y - array[a].size.y;
+            let bBtm = array[b].position.y + array[b].size.y;
+
+            if( aTop > bBtm ) { continue }
+
+            boxBoxCollisionResolution(array[a], array[b]);
+        }
+    }
+};
+
+function boxBoxCollisionResolution(boxA, boxB) {
+
+    let distX = boxA.position.x - boxB.position.x;
+    let distY = boxA.position.y - boxB.position.y;
+
+    let velX = boxA.velocity.x - boxB.velocity.x;
+    let velY = boxA.velocity.y - boxB.velocity.y;
+    
+    let intersectX = Math.abs(distX) - ( boxA.size.x + boxB.size.x );
+    let intersectY = Math.abs(distY) - ( boxA.size.y + boxB.size.y );
+
+    let reducedMass = (boxA.inverseMass + boxB.inverseMass) != 0.0 ? 1.0 / (boxA.inverseMass + boxB.inverseMass) : 0.0;
+
+    let massA = boxA.inverseMass * reducedMass;
+    let massB = boxB.inverseMass * reducedMass;
+
+    if( intersectX > intersectY ){
+
+        boxA.velocity.x -= ( 1.0 + boxA.restitution ) * velX * massA;
+        boxA.position.x -= 1.01 * Math.sign(distX) * intersectX * massA;
+        boxA.velocity.y -= boxA.friction * velY * massA;
+
+        boxB.velocity.x += ( 1.0 + boxB.restitution ) * velX * massB;
+        boxB.position.x += 1.01 * Math.sign(distX) * intersectX * massB;
+        boxB.velocity.y += boxB.friction * velY * massB;
+    } 
+    else {
+
+        boxA.velocity.y -= ( 1.0 + boxA.restitution ) * velY * massA;
+        boxA.position.y -= 1.01 * Math.sign(distY) * intersectY * massA;
+        boxA.velocity.x -= boxA.friction * velX * massA;
+
+        boxB.velocity.y += ( 1.0 + boxB.restitution ) * velY * massB;
+        boxB.position.y += 1.01 * Math.sign(distY) * intersectY * massB;
+        boxB.velocity.x += boxB.friction * velX * massB;
     }
 }
 
@@ -666,12 +729,6 @@ function renderScene(){
     ctx.fillStyle = my_gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Camera matrix transform
-    var x = -camera.position.x * camera.zoom + canvas.width * 0.5;
-    var y = -camera.position.y * camera.zoom + canvas.height * 0.5;
-    ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
-
-    // Render game objects
     renderGameEntities(doodads, doodadTextures);
     renderGameEntities(walls, wallTextures);
     renderGameEntities(towers, towerTextures);
@@ -679,9 +736,7 @@ function renderScene(){
     renderGameEntities(worldBlocks, []);
 
     renderProjectiles();
-    renderExplosions();
 
-    // 
     ctx.resetTransform();
     let numLiveDucks = enemies.filter(e => e.isAlive()).length;
     ctx.font = '24px serif';
@@ -689,6 +744,8 @@ function renderScene(){
     ctx.fillText(`Enemies left: ${numLiveDucks}`, 40, 40);
     ctx.fillText(`Next wave in:`, canvas.width - 600, 40);
     ctx.fillText(`Caps:`, canvas.width - 200, 40);
+
+    requestAnimationFrame(renderScene);
 
 };
 
@@ -699,30 +756,23 @@ function renderGameEntities(array, textureArray){
         if( !array[i].isAlive()) { continue };
 
         var img = textureArray[array[i].texture];
+        var x = ( array[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
+        var y = ( array[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
+        ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
         
         if( img === null || img === undefined ){
 
-            var my_gradient = ctx.createLinearGradient(array[i].position.x, array[i].position.y-array[i].size.y, array[i].position.x, array[i].position.y+array[i].size.y);
-            my_gradient.addColorStop(0, "#ffffff"); // ccddff
-            my_gradient.addColorStop(1 - (array[i].size.y / (array[i].size.y + 20)), "#ffffff");
+            var my_gradient = ctx.createLinearGradient(0, -array[i].size.y, 0, array[i].size.y);
+            my_gradient.addColorStop(0, "#ffffff");
             my_gradient.addColorStop(1 - (array[i].size.y / (array[i].size.y + 80)), "#886655");
             my_gradient.addColorStop(1, "#886655");
             ctx.fillStyle = my_gradient;
 
-            ctx.fillRect(
-                array[i].position.x - array[i].size.x, 
-                array[i].position.y - array[i].size.y, 
-                array[i].size.x * 2, 
-                array[i].size.y * 2);
+            ctx.fillRect(-array[i].size.x, -array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
         } 
         else {
 
-            ctx.drawImage(
-                img, 
-                array[i].position.x - array[i].size.x, 
-                array[i].position.y - array[i].size.y, 
-                array[i].size.x * 2, 
-                array[i].size.y * 2);
+            ctx.drawImage(img, -array[i].size.x, -array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
         }
     }
 };
@@ -733,34 +783,14 @@ function renderProjectiles(){
 
         if( !projectiles[i].isAlive()) { continue };
         
+        var x = ( projectiles[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
+        var y = ( projectiles[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
+        ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
         ctx.beginPath();
-        ctx.arc(projectiles[i].position.x, projectiles[i].position.y, 10, 0, Math.PI * 2);
-        ctx.fillStyle = "#444444";
+        ctx.arc(0, 0, 10, 0, Math.PI * 2);
+        ctx.fillStyle = "#FFFFFF";
         ctx.fill();
         ctx.closePath();
-    }
-};
-
-function renderExplosions(){
-    
-    for(let i = 0; i < explosions.length; i++){
-
-        if( !explosions[i].isAlive()) { continue };
-        
-        var alpha = (explosions[i].lifeTime / 2000.0);
-        console.log(alpha);
-
-        var rdl = ctx.createRadialGradient(
-            explosions[i].position.x, explosions[i].position.y, 0, 
-            explosions[i].position.x, explosions[i].position.y, explosions[i].radius);
-        rdl.addColorStop(0.0, 'rgba(255, 255, 255, 0)');
-        rdl.addColorStop(0.9, 'rgba(255, 255, 255, 0)');
-        rdl.addColorStop(1.0, `rgba(255, 255, 255, ${alpha})`);
-    
-        ctx.beginPath();
-        ctx.fillStyle = rdl;
-        ctx.arc(explosions[i].position.x, explosions[i].position.y, explosions[i].radius, 0, Math.PI * 2);
-        ctx.fill();
     }
 };
 

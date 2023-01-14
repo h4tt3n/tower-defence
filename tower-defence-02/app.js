@@ -235,7 +235,7 @@ function initGame(){
     setInterval(spawnWaveofEnemies, 30000);
 
     setInterval(gameLoop, FPS);
-
+    requestAnimationFrame(renderScene);
 };
 
 function gameLoop(){
@@ -256,7 +256,7 @@ function gameLoop(){
 
     updateState();
     
-    requestAnimationFrame(renderScene);
+    //requestAnimationFrame(renderScene);
 };
 
 function updateState(){
@@ -744,6 +744,8 @@ function renderScene(){
     ctx.fillText(`Enemies left: ${numLiveDucks}`, 40, 40);
     ctx.fillText(`Next wave in:`, canvas.width - 600, 40);
     ctx.fillText(`Caps:`, canvas.width - 200, 40);
+
+    requestAnimationFrame(renderScene);
 
 };
 

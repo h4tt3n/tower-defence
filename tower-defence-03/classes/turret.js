@@ -3,17 +3,16 @@ import Vector from './vector.js'
 import GameEntity from './gameEntity.js'
 
 export default class Tower extends GameEntity {
-    constructor(posX, posY, velX, velY, sizeX, sizeY, mass, friction, restitution, hitPoints, texture, 
-                minRange, maxRange, coolDownTime, numProjectiles, projectileDamage, projectileVelocity){
-        super(posX, posY, velX, velY, sizeX, sizeY, mass, friction, restitution, hitPoints, texture);
-        this.minRangeSquared = minRange**2;
-        this.maxRangeSquared = maxRange**2;
+    constructor(hitPoints, minRange, maxRange, coolDownTime, numProjectiles, projectileDamage, projectileVelocity, texture, posX, posY, sizeX, sizeY){
+        super(hitPoints, texture, posX, posY, sizeX, sizeY);
+        this.target = null;
         this.coolDownTime = coolDownTime;
+        this.canFire = true;
         this.numProjectiles = numProjectiles;
         this.projectileDamage = projectileDamage;
         this.projectileVelocity = projectileVelocity;
-        this.target = null;
-        this.canFire = true;
+        this.minRangeSquared = minRange**2;
+        this.maxRangeSquared = maxRange**2;
     }
     updateState(enemies, projectiles){
 
@@ -73,6 +72,8 @@ export default class Tower extends GameEntity {
             projectile.damage = this.projectileDamage;
             projectile.position.x = this.position.x;
             projectile.position.y = this.position.y;
+    
+            //let velocity = 2000; //getRandomInt(1900, 2100);
 
             let rnd1 = (Math.random() - Math.random()) * 0.08;
             let rnd2 = (Math.random() - Math.random()) * 0.08;
