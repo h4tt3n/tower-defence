@@ -682,7 +682,8 @@ function boxBoxCollisionResolution(boxA, boxB) {
     let intersectX = Math.abs(distX) - ( boxA.size.x + boxB.size.x );
     let intersectY = Math.abs(distY) - ( boxA.size.y + boxB.size.y );
 
-    let reducedMass = (boxA.inverseMass + boxB.inverseMass) != 0.0 ? 1.0 / (boxA.inverseMass + boxB.inverseMass) : 0.0;
+    let inverseMassSum = boxA.inverseMass + boxB.inverseMass;
+    let reducedMass = inverseMassSum > 0.0 ? 1.0 / inverseMassSum : 0.0;
 
     let massA = boxA.inverseMass * reducedMass;
     let massB = boxB.inverseMass * reducedMass;
