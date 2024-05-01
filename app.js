@@ -280,6 +280,7 @@ function updateState(){
     collisionDetectionBetween(walls, enemies);
     collisionDetectionBetween(walls, towers);
 
+    collisionDetectionAmong(towers);
     collisionDetectionAmong(walls);
 };
 
