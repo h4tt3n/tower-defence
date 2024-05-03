@@ -721,15 +721,27 @@ function boxBoxCollisionResolution(boxA, boxB) {
 
 function renderScene(){
 
-    // Reset
-    ctx.resetTransform();
-
     // Clear screen
     var my_gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     my_gradient.addColorStop(0, "#bbccee");
     my_gradient.addColorStop(1, "#6677aa");
     ctx.fillStyle = my_gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save(); // Save the current context state
+    ctx.translate(canvas.width / 2, canvas.height / 2); // Translate to the center of the canvas
+    ctx.scale(camera.zoom, camera.zoom); // Apply zoom
+    ctx.translate(-camera.position.x, -camera.position.y); // Apply position
+
+    // // Reset
+    // ctx.resetTransform();
+
+    // // Clear screen
+    // var my_gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    // my_gradient.addColorStop(0, "#bbccee");
+    // my_gradient.addColorStop(1, "#6677aa");
+    // ctx.fillStyle = my_gradient;
+    // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     renderGameEntities(doodads, doodadTextures);
     renderGameEntities(walls, wallTextures);
@@ -738,6 +750,8 @@ function renderScene(){
     renderGameEntities(worldBlocks, []);
 
     renderProjectiles();
+
+    ctx.restore(); // Restore the context state
 
     ctx.resetTransform();
     let numLiveDucks = enemies.filter(e => e.isAlive()).length;
@@ -758,9 +772,9 @@ function renderGameEntities(array, textureArray){
         if( !array[i].isAlive()) { continue };
 
         var img = textureArray[array[i].texture];
-        var x = ( array[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
-        var y = ( array[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
-        ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
+
+        var x = array[i].position.x;
+        var y = array[i].position.y;
         
         if( img === null || img === undefined ){
 
@@ -769,12 +783,23 @@ function renderGameEntities(array, textureArray){
             my_gradient.addColorStop(1 - (array[i].size.y / (array[i].size.y + 80)), "#886655");
             my_gradient.addColorStop(1, "#886655");
             ctx.fillStyle = my_gradient;
+            
+            // FillRect without save and translate
+            //ctx.fillRect(x - array[i].size.x, y - array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
 
+            ctx.save();
+            ctx.translate(x, y);
             ctx.fillRect(-array[i].size.x, -array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
+            ctx.restore();
         } 
         else {
 
-            ctx.drawImage(img, -array[i].size.x, -array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
+            ctx.drawImage(img, x - array[i].size.x, y - array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
+
+            // ctx.save();
+            // ctx.translate(x, y);
+            // ctx.drawImage(img, -array[i].size.x, -array[i].size.y, array[i].size.x * 2, array[i].size.y * 2);
+            // ctx.restore();
         }
     }
 };
@@ -785,11 +810,11 @@ function renderProjectiles(){
 
         if( !projectiles[i].isAlive()) { continue };
         
-        var x = ( projectiles[i].position.x - camera.position.x ) * camera.zoom + canvas.width * 0.5;
-        var y = ( projectiles[i].position.y - camera.position.y ) * camera.zoom + canvas.height * 0.5;
-        ctx.setTransform(camera.zoom, 0, 0, camera.zoom, x, y);
+        var x = projectiles[i].position.x;
+        var y = projectiles[i].position.y;
+        
         ctx.beginPath();
-        ctx.arc(0, 0, 10, 0, Math.PI * 2);
+        ctx.arc(x, y, 10, 0, Math.PI * 2);
         ctx.fillStyle = "#FFFFFF";
         ctx.fill();
         ctx.closePath();
